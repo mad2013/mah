@@ -1,0 +1,9 @@
+iCal4j -- every search on google leads us to this API. It was also
+recommended on StackExchange.
+http://wiki.modularity.net.au/ical4j/
+There is also information on how you work with this in Android & Eclipse:
+http://wiki.modularity.net.au/ical4j/index.php?title=Android
+
+Additional information on how to shrink your Android APK file when
+using libraries, as it seems to get very bloated fast when including libraries:
+http://code.google.com/p/maven-android-plugin/wiki/ProGuard
