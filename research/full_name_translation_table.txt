@@ -1,0 +1,12 @@
+If you retrieve the schedule from KronoX in XML with parameter
+"forklaringar=true" in the query string you will get a table at the
+end, with mappings from ID to full names. It seems a bit poorly
+updated though: K3LARA translates to Lars Rauer? Must be an old
+name. At least the course names seem correct, as these are the same
+that you search for.
+
+However, when you retrieve the same schedule from KronoX in iCal
+format with this parameter, the information is not there. I guess
+there is no place to put this data in the iCal file format. Lars spoke
+to the us about getting this full name data from Kursdatabasen. Could
+that be possible?
