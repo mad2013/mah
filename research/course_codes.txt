@@ -1,0 +1,7 @@
+Through some investigating of the KronoX javascript I've found that
+they have an ajax service they use to autocomplete courses as you
+search for them.
+
+http://kronox.mah.se/ajax/ajax_autocompleteResurser.jsp?typ=kurs
+
+Still need to find out more about how to specify what to search for.
