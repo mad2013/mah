@@ -1,10 +1,8 @@
 package se.mah.k3.schedule;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Locale;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -12,15 +10,26 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
-import android.widget.TextView;
+import android.widget.ListView;
 public class MainActivity extends Activity {
+	ListView listView;
+	private ScheduleAdapter adapter;
+	ArrayList<ScheduleItem> items;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.schedule_main);
 		ArrayList<KronoxCourse> courses = new ArrayList<KronoxCourse>();
 		courses.add(new KronoxCourse("KD330A-20132-62311"));
-		new UpdateTask().execute(courses.get(0));
+		try {
+			KronoxCalendar.createCalendar(KronoxReader.getFile(getApplicationContext()));
+		} catch(IOException e) {
+			new UpdateTask().execute(courses.get(0));
+		} catch(ParserException e) {
+			new UpdateTask().execute(courses.get(0));
+		}
+		setupListView();
+		listToday();
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -33,11 +42,7 @@ public class MainActivity extends Activity {
 		protected Void doInBackground(KronoxCourse... courses) {
 			try {
 				KronoxReader.update(getApplicationContext(), courses);
-				KronoxCalendar.createCalendar(KronoxReader.getFile(getApplicationContext()));
 			} catch(IOException e) {
-				e.printStackTrace();
-				// TODO: toast on error?
-			} catch(ParserException e) {
 				e.printStackTrace();
 				// TODO: toast on error?
 			}
@@ -45,25 +50,25 @@ public class MainActivity extends Activity {
 		}
 		@Override
 		protected void onPostExecute(Void _void) {
-			String text = "";
-			Collection<?> events = KronoxCalendar.todaysEvents();
-			for(Iterator<?> i = events.iterator(); i.hasNext();) {
-				Component c = (Component)i.next();
-				// text += "Event: " + component.getName() + "\n";
-				if(c instanceof VEvent) {
-					VEvent v = (VEvent)c;
-					SimpleDateFormat time_format = new SimpleDateFormat("HH:mm", Locale.US);
-					SimpleDateFormat date_format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
-					text += "Starts:" + time_format.format(v.getStartDate().getDate()) + "\n"; 
-					text += "Ends:" + time_format.format(v.getEndDate().getDate()) + "\n";
-					text += "Summary:" + v.getSummary().getValue() + "\n";
-					text += "Location:" + v.getLocation().getValue() + "\n";
-					text += "Last modified:" + date_format.format(v.getLastModified().getDate()) + "\n";
-					text += "\n";
-				}
-			}
-			TextView textView1 = (TextView)findViewById(R.id.textView1);
-			textView1.setText(text);
+			// TODO: update current view
 		}
+	}
+	private void setupListView() {
+		listView = (ListView)findViewById(R.id.listView);
+		items = new ArrayList<ScheduleItem>();
+		adapter = new ScheduleAdapter(this, items);
+		listView.setAdapter(adapter);
+	}
+	private void listToday() {
+		Collection<?> kronox_events = KronoxCalendar.todaysEvents();
+		adapter.setNotifyOnChange(false);
+		items.clear();
+		for(Iterator<?> i = kronox_events.iterator(); i.hasNext();) {
+			Component c = (Component)i.next();
+			if(c instanceof VEvent) {
+				items.add(new ScheduleItem((VEvent)c));
+			}
+		}
+		adapter.notifyDataSetChanged();
 	}
 }
