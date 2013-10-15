@@ -1,18 +1,20 @@
 package se.mah.k3.schedule;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Locale;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
 public class MainActivity extends Activity {
-  @Override
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.schedule_main);
@@ -26,7 +28,7 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	private class UpdateTask extends AsyncTask<KronoxCourse, Void, Void> {
+	private class UpdateTask extends AsyncTask<KronoxCourse,Void,Void> {
 		@Override
 		protected Void doInBackground(KronoxCourse... courses) {
 			try {
@@ -42,19 +44,23 @@ public class MainActivity extends Activity {
 			return null;
 		}
 		@Override
-		protected void onPostExecute(Void v) {
+		protected void onPostExecute(Void _void) {
 			String text = "";
-			@SuppressWarnings("unchecked") Collection<Component> events = (Collection<Component>)KronoxCalendar.todaysEvents();
-			for(Iterator<Component> i = events.iterator(); i.hasNext();) {
-				Component component = i.next();
-				text += "Event: " + component.getName() + "\n";
-				for(@SuppressWarnings("unchecked") Iterator<Property> j = component.getProperties()
-				                                                                   .iterator(); j.hasNext();) {
-					Property property = (Property)j.next();
-					text += "    " + property.getName() + "=" + property.getValue()
-					        + "\n";
+			Collection<?> events = KronoxCalendar.todaysEvents();
+			for(Iterator<?> i = events.iterator(); i.hasNext();) {
+				Component c = (Component)i.next();
+				// text += "Event: " + component.getName() + "\n";
+				if(c instanceof VEvent) {
+					VEvent v = (VEvent)c;
+					SimpleDateFormat time_format = new SimpleDateFormat("HH:mm", Locale.US);
+					SimpleDateFormat date_format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+					text += "Starts:" + time_format.format(v.getStartDate().getDate()) + "\n"; 
+					text += "Ends:" + time_format.format(v.getEndDate().getDate()) + "\n";
+					text += "Summary:" + v.getSummary().getValue() + "\n";
+					text += "Location:" + v.getLocation().getValue() + "\n";
+					text += "Last modified:" + date_format.format(v.getLastModified().getDate()) + "\n";
+					text += "\n";
 				}
-				text += "\n\n";
 			}
 			TextView textView1 = (TextView)findViewById(R.id.textView1);
 			textView1.setText(text);
