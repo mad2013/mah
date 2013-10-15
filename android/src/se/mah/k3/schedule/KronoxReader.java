@@ -1,23 +1,20 @@
 package se.mah.k3.schedule;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.AbstractCollection;
 import android.content.Context;
 public class KronoxReader {
 	private final static String LOCAL_FILENAME = "courses.ical";
 	private final static String LENGTH_UNIT = "v"; // d=days, v=weeks, m=months
 	private final static int LENGTH = 2;
 	private final static String LANGUAGE = "EN"; // EN or SV
-	//private static KronoxReader instance = new KronoxReader();
-	protected KronoxReader() {
+	private KronoxReader() {
 	}
-	//public static KronoxReader getInstance() {
-		//return instance;
-//	}
-	protected static String generateURL(AbstractCollection<KronoxCourse> courses) {
+	private static String generateURL(KronoxCourse[] courses) {
 		String kurser = "";
 		for(KronoxCourse course : courses) {
 			kurser += String.format("k.%s-%%2C", course.getFullCode());
@@ -31,18 +28,36 @@ public class KronoxReader {
 		return url;
 	}
 	/**
+	 * This will download the iCalendar file from KronoX and save it locally.
+	 * 
 	 * @param ctx
-	 *        The app's getContext()
+	 *        Context from getApplicationContext()
 	 * @param courses
 	 *        The courses that will be included in the calendar
 	 * @throws IOException
 	 *         This will be thrown on network errors or file writing errors
 	 */
-	public static void update(Context ctx, AbstractCollection<KronoxCourse> courses) throws IOException {
+	public static void update(Context ctx, KronoxCourse[] courses) throws IOException {
 		URL url = new URL(KronoxReader.generateURL(courses));
-		ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+		InputStream is = url.openStream();
+		DataInputStream dis = new DataInputStream(is);
 		FileOutputStream fos = ctx.openFileOutput(KronoxReader.LOCAL_FILENAME,
 		                                          Context.MODE_PRIVATE);
-		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+		byte[] buffer = new byte[4096];
+		int length;
+		while((length = dis.read(buffer)) > 0) {
+			fos.write(buffer, 0, length);
+		}
+		fos.close();
+	}
+	/**
+	 * This will give you a file stream to the calendar. The calendar will not be
+	 * updated beforehand.
+	 * 
+	 * @return The file stream
+	 * @throws FileNotFoundException
+	 */
+	public static FileInputStream getFile(Context ctx) throws FileNotFoundException {
+		return ctx.openFileInput(KronoxReader.LOCAL_FILENAME);
 	}
 }
