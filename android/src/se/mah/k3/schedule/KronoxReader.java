@@ -11,9 +11,17 @@ public class KronoxReader {
 	private final static String LOCAL_FILENAME = "courses.ical";
 	private final static String LENGTH_UNIT = "v"; // d=days, v=weeks, m=months
 	private final static int LENGTH = 2;
-	private final static String LANGUAGE = "EN"; // EN or SV
+	// We will need to be consistent here, since the _tags_ in the summary field
+	// are language dependent!
+	private final static String LANGUAGE = "EN";
 	private KronoxReader() {
 	}
+	/**
+	 * Generates the URL that gets the iCalendar files for our courses.
+	 * 
+	 * @param courses Any number of courses
+	 * @return The URL
+	 */
 	private static String generateURL(KronoxCourse[] courses) {
 		String kurser = "";
 		for(KronoxCourse course : courses) {
