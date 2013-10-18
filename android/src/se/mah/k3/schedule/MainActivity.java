@@ -96,6 +96,7 @@ public class MainActivity extends Activity {
 		for(Iterator<?> i = kronox_events.iterator(); i.hasNext();) {
 			Component c = (Component)i.next();
 			if(c instanceof VEvent) {
+				Log.i("ScheduleGUI", "ScheduleItem courseName=" + new ScheduleItem((VEvent)c).getCourseName());
 				items.add(new ScheduleItem((VEvent)c));
 			}
 		}
